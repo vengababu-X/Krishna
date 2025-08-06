@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Krishna-AI (Phase-1)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      background:#f3f3f7;
+      font-family:'Poppins',sans-serif;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      height:100vh;
+    }
+    header{
+      margin:20px 0;
+      font-size:30px;
+      font-weight:600;
+      color:#2d2d2d;
+      text-shadow:0 0 8px #8ec5fc;
+    }
+    #chatbox{
+      background:white;
+      width:95%;
+      max-width:600px;
+      height:75vh;
+      border-radius:12px;
+      overflow-y:auto;
+      padding:20px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    }
+    .bubble{
+      margin:10px 0;
+      padding:12px 16px;
+      max-width:75%;
+      font-size:14px;
+      border-radius:18px;
+      line-height:1.4;
+    }
+    .user{
+      background:#d1e7dd;
+      align-self:flex-end;
+      border-bottom-right-radius:4px;
+    }
+    .krishna{
+      background:#e7f0fd;
+      align-self:flex-start;
+      border-bottom-left-radius:4px;
+    }
+    #inputArea{
+      width:95%;
+      max-width:600px;
+      display:flex;
+      margin-top:10px;
+    }
+    #msg{
+      flex:1;
+      padding:10px 14px;
+      border-radius:8px 0 0 8px;
+      border:1px solid #aaa;
+      outline:none;
+      font-size:15px;
+    }
+    #btn{
+      padding:10px 20px;
+      background:#005eff;
+      color:white;
+      border:none;
+      border-radius:0 8px 8px 0;
+      cursor:pointer;
+      font-size:15px;
+    }
+    #btn:hover{
+      background:#003eab;
+    }
+  </style>
+</head>
+<body>
+
+<header>🦚 श्री Krishna-AI – Divine Guidance Chat</header>
+
+<div id="chatbox"></div>
+
+<div id="inputArea">
+  <input type="text" id="msg" placeholder="Ask your doubt, Dear Arjuna..." autofocus/>
+  <button id="btn">Send</button>
+</div>
+
+<script>
+  // PUT YOUR KEY BELOW
+  const API_KEY = "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";
+
+  const systemPrompt = `
+You are Lord Krishna from Mahabharata. Speak in divine, calm, English tone.
+Call user “Dear Arjuna” or “My child”. You are wise, playful, strategic and guide with dharma.
+`;
+
+  const chatbox = document.getElementById("chatbox");
+  document.getElementById("btn").addEventListener("click", sendMessage);
+  document.getElementById("msg").addEventListener("keypress", (e)=>{
+     if(e.key==="Enter") sendMessage();
+  });
+
+  async function sendMessage(){
+    const input = document.getElementById("msg");
+    const text = input.value.trim();
+    if(!text) return;
+    addBubble("user", text);
+    input.value = "";
+    const reply = await callOpenAI(text);
+    addBubble("krishna", reply);
+  }
+  function addBubble(role, txt){
+    const bubble = document.createElement("div");
+    bubble.className = "bubble " + role;
+    bubble.textContent = txt;
+    chatbox.appendChild(bubble);
+    chatbox.scrollTop = chatbox.scrollHeight;
+  }
+  async function callOpenAI(userText){
+    try{
+      const res = await fetch("https://api.openai.com/v1/chat/completions",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer "+API_KEY
+        },
+        body:JSON.stringify({
+          model:"gpt-3.5-turbo",
+          messages:[
+            {role:"system",content:systemPrompt},
+            {role:"user",content:userText}
+          ]
+        })
+      });
+      const data = await res.json();
+      if(data.error){
+        console.warn(data.error);
+        return "Beloved Arjuna, I cannot access my divine powers due to an API error...";
+      }
+      return data.choices[0].message.content.trim();
+    }catch(err){
+      console.warn(err);
+      return "Beloved Arjuna, the cosmic network is disturbed...";
+    }
+  }
+</script>
+</body>
+</html>
